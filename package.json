@@ -1,0 +1,23 @@
+{
+  "name": "shuden-0013",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "終電 0:13 — first-person 3D anomaly-search game for the browser",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "three": "^0.185.1"
+  },
+  "devDependencies": {
+    "@types/three": "^0.185.0",
+    "playwright": "^1.62.1",
+    "pngjs": "^7.0.0",
+    "typescript": "^5.9.3",
+    "vite": "^8.2.1"
+  }
+}

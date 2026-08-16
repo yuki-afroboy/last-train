@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#05070b" />
+    <meta name="description" content="終電 0:13 — 深夜の無人駅ホームで異変をさがす、一人称3D探索ゲーム。ブラウザですぐ遊べます。" />
+    <meta property="og:title" content="終電 0:13" />
+    <meta property="og:description" content="深夜0時過ぎ。無人のホーム。異変を見つけたら、引き返してください。" />
+    <meta property="og:type" content="website" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <title>終電 0:13</title>
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="scene"></canvas>
+
+      <!-- ===== Boot / loading ===== -->
+      <div id="boot" class="layer">
+        <div class="boot-inner">
+          <div class="boot-title">終電 0:13</div>
+          <div class="boot-bar"><i id="boot-bar-fill"></i></div>
+          <div class="boot-note" id="boot-note">読み込み中…</div>
+        </div>
+      </div>
+
+      <!-- ===== Title ===== -->
+      <div id="title" class="layer hidden">
+        <div class="title-grad"></div>
+        <div class="title-inner">
+          <h1 class="title-main"><span>終電</span><em>0:13</em></h1>
+          <nav class="title-menu">
+            <button id="btn-start" class="menu-btn">START</button>
+            <button id="btn-settings" class="menu-btn">SETTINGS</button>
+          </nav>
+          <div class="title-record" id="title-record"></div>
+        </div>
+        <div class="title-foot">クリックで開始 / WASD 移動 ・ マウス 視点</div>
+      </div>
+
+      <!-- ===== In-game HUD ===== -->
+      <div id="hud" class="layer pass hidden">
+        <div id="reticle"></div>
+        <div id="prompt" class="hidden"><b>E</b> 調べる</div>
+        <div id="progress-flash"></div>
+        <div id="subtitle"></div>
+        <div id="vignette-alert"></div>
+        <div id="debug" class="hidden"></div>
+      </div>
+
+      <!-- ===== Inspect overlay ===== -->
+      <div id="inspect" class="layer hidden">
+        <div class="inspect-card">
+          <div class="inspect-title" id="inspect-title"></div>
+          <div class="inspect-body" id="inspect-body"></div>
+          <div class="inspect-close">閉じる — <b>E</b> / クリック</div>
+        </div>
+      </div>
+
+      <!-- ===== Pause ===== -->
+      <div id="pause" class="layer hidden">
+        <div class="panel">
+          <h2>PAUSE</h2>
+          <div class="pause-stats" id="pause-stats"></div>
+          <button id="btn-resume" class="menu-btn">RESUME</button>
+          <button id="btn-settings2" class="menu-btn">SETTINGS</button>
+          <button id="btn-quit" class="menu-btn subtle">TITLE へ戻る</button>
+        </div>
+      </div>
+
+      <!-- ===== Settings ===== -->
+      <div id="settings" class="layer hidden">
+        <div class="panel wide">
+          <h2>SETTINGS</h2>
+
+          <label class="row">
+            <span>GRAPHICS</span>
+            <span class="seg" id="seg-quality">
+              <button data-v="low">LOW</button>
+              <button data-v="medium">MEDIUM</button>
+              <button data-v="high">HIGH</button>
+            </span>
+          </label>
+
+          <label class="row">
+            <span>MOUSE SENS <i id="v-sens"></i></span>
+            <input type="range" id="in-sens" min="0.3" max="2.5" step="0.05" />
+          </label>
+
+          <label class="row">
+            <span>MASTER <i id="v-vol"></i></span>
+            <input type="range" id="in-vol" min="0" max="1" step="0.01" />
+          </label>
+
+          <label class="row">
+            <span>FOV <i id="v-fov"></i></span>
+            <input type="range" id="in-fov" min="60" max="95" step="1" />
+          </label>
+
+          <label class="row">
+            <span>頭の揺れ (BOB) <i id="v-bob"></i></span>
+            <input type="range" id="in-bob" min="0" max="1" step="0.05" />
+          </label>
+
+          <label class="row">
+            <span>INVERT Y</span>
+            <span class="seg" id="seg-invert">
+              <button data-v="off">OFF</button>
+              <button data-v="on">ON</button>
+            </span>
+          </label>
+
+          <button id="btn-settings-back" class="menu-btn">BACK</button>
+        </div>
+      </div>
+
+      <!-- ===== Result overlays ===== -->
+      <div id="result" class="layer hidden">
+        <div class="result-inner">
+          <div class="result-clock" id="result-clock">0:13</div>
+          <h2 id="result-title"></h2>
+          <p id="result-body"></p>
+          <button id="btn-retry" class="menu-btn">もう一度</button>
+          <button id="btn-result-title" class="menu-btn subtle">TITLE</button>
+        </div>
+      </div>
+
+      <!-- ===== Touch controls ===== -->
+      <div id="touch" class="layer pass hidden">
+        <div id="stick" class="stick"><i></i></div>
+        <button id="tbtn-interact" class="tbtn">調べる</button>
+        <button id="tbtn-run" class="tbtn run">走る</button>
+        <button id="tbtn-menu" class="tbtn menu">☰</button>
+      </div>
+
+      <div id="rotate-hint" class="layer hidden">
+        <div>端末を横向きにしてください</div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
