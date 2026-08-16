@@ -63,6 +63,7 @@ const poses = {
   'c-mid-wall': [-2, 1.6, Math.PI, -0.05],
   'd-edge-track': [0, 2.6, 0, -0.06],
   'e-north-end': [14, 0.4, -Math.PI / 2, 0.05],
+  'e2-exit-sign': [9, 0.4, -Math.PI / 2, 0.16],
   'f-look-back': [8, 0.6, Math.PI / 2, 0],
   'g-clock': [-4, 1.4, -Math.PI / 2, 0.42],
   'h-vending': [7.8, 1.2, Math.PI, 0.06],

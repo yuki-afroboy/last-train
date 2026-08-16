@@ -679,7 +679,10 @@ export class Station {
       ceil.rotation.z = sx * -0.34;
       g.add(ceil);
 
-      // exit sign above the mouth — this is the progress counter
+      // Illuminated 出口 sign hung from the roof ahead of the stairs. This
+      // doubles as the progress counter, so it must be legible from anywhere
+      // along the platform — hanging it here rather than on the end wall keeps
+      // it clear of the stairwell lintel and readable during the whole walk.
       const tex = T.exitSign('0');
       const mat = new THREE.MeshStandardMaterial({
         map: tex,
@@ -687,10 +690,16 @@ export class Station {
         emissiveMap: tex,
         emissiveIntensity: 1.2,
         roughness: 0.4,
+        side: THREE.DoubleSide,
       });
-      const sign = P.mesh(new THREE.PlaneGeometry(1.15, 0.58), mat, sx * (mouth - 0.22), L.ROOF_Y - 0.75, 0, false, false);
-      sign.rotation.y = sx > 0 ? Math.PI : 0;
+      // Mounted on the platform-facing surface of the lintel, clear of the
+      // opening. The lintel box spans x = mouth ± 0.2, so sit 6 cm proud of it.
+      const signX = sx * (mouth - 0.26);
+      const sign = P.mesh(new THREE.PlaneGeometry(1.55, 0.64), mat, signX, L.ROOF_Y - 0.68, 0, false, false);
+      // face back down the platform, not across it
+      sign.rotation.y = sx > 0 ? -Math.PI / 2 : Math.PI / 2;
       g.add(sign);
+      g.add(P.mesh(P.box(0.05, 0.72, 1.63), this.mats.darkSteel, sx * (mouth - 0.21), L.ROOF_Y - 0.68, 0, false, false));
       this.exitSigns.push({ mesh: sign, material: mat });
 
       // one lamp inside the stairwell

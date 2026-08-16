@@ -26,6 +26,30 @@ export class UI {
   ) {
     this.bind();
     this.syncSettings();
+    this.watchOrientation();
+  }
+
+  /**
+   * Landscape is a much better fit for a first-person game on a phone, but a
+   * player who cannot rotate must never be locked out — the hint is a
+   * suggestion that any tap dismisses, not a wall.
+   */
+  private watchOrientation(): void {
+    const hint = $('rotate-hint');
+    const touch = matchMedia('(pointer: coarse)').matches;
+    if (!touch) return;
+    let dismissed = false;
+    const check = (): void => {
+      const portrait = innerHeight > innerWidth;
+      hint.classList.toggle('hidden', dismissed || !portrait);
+    };
+    hint.addEventListener('click', () => {
+      dismissed = true;
+      hint.classList.add('hidden');
+    });
+    addEventListener('resize', check);
+    addEventListener('orientationchange', () => setTimeout(check, 250));
+    check();
   }
 
   /* ------------------------------------------------------------ layers */
@@ -54,6 +78,12 @@ export class UI {
     if (d.bestProgress > 0) bits.push(`BEST ${d.bestProgress} / 8`);
     if (d.foundAnomalies.length > 0) bits.push(`ANOMALIES ${d.foundAnomalies.length}`);
     $('title-record').textContent = bits.join('   ·   ');
+    const foot = document.querySelector('.title-foot');
+    if (foot) {
+      foot.textContent = matchMedia('(pointer: coarse)').matches
+        ? 'タップで開始 / 左スティック 移動 ・ 右側ドラッグ 視点'
+        : 'クリックで開始 / WASD 移動 ・ マウス 視点';
+    }
   }
 
   showGame(touch: boolean): void {

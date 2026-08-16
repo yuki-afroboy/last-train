@@ -112,7 +112,7 @@ export class RendererSystem {
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.1;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = THREE.PCFShadowMap;
     // reset once per frame instead of once per pass, so drawCalls reports the
     // whole frame including every post-processing pass
     this.renderer.info.autoReset = false;

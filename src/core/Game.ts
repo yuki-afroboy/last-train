@@ -300,7 +300,12 @@ export class Game {
     if (first) {
       await this.wait(1.2);
       if (token !== this.sequenceToken) return;
-      this.ui.subtitle('WASD 移動   ·   マウス 視点   ·   E 調べる   ·   ESC メニュー', 7000);
+      this.ui.subtitle(
+        this.input.isTouch
+          ? '左スティック 移動   ·   画面右側 ドラッグで視点   ·   調べる'
+          : 'WASD 移動   ·   マウス 視点   ·   E 調べる   ·   ESC メニュー',
+        7000,
+      );
     }
 
     await this.fadeTo(0, 1.25);
@@ -537,13 +542,14 @@ export class Game {
     this.titleT += dt;
     const t = this.titleT * 0.055;
     const cam = this.gfx.camera;
-    // a slow, almost-still drift along the platform
+    // A slow, almost-still drift down the middle of the platform. The path is
+    // kept off the pillar line (z = 2) so nothing ever swings across the title.
     cam.position.set(
-      -6 + Math.sin(t) * 5.5,
-      L.DECK_Y + 1.62 + Math.sin(t * 0.7) * 0.1,
-      0.4 + Math.cos(t * 0.6) * 1.2,
+      -8 + Math.sin(t) * 3.2,
+      L.DECK_Y + 1.62 + Math.sin(t * 0.7) * 0.09,
+      -0.7 + Math.cos(t * 0.6) * 0.7,
     );
-    cam.lookAt(8 + Math.sin(t * 0.4) * 4, L.DECK_Y + 1.5, 3.2);
+    cam.lookAt(11 + Math.sin(t * 0.4) * 3, L.DECK_Y + 1.45, 1.2);
     this.station.update(dt, cam);
   }
 

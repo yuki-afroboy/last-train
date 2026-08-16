@@ -255,6 +255,17 @@ html, body {
 }
 #subtitle.show { opacity: 1; }
 
+/* keep captions clear of the on-screen stick and buttons */
+@media (pointer: coarse) {
+  #subtitle {
+    bottom: max(26vh, 190px);
+    font-size: 13px;
+  }
+  #progress-flash {
+    top: 9%;
+  }
+}
+
 #vignette-alert {
   position: absolute;
   inset: 0;
@@ -361,12 +372,33 @@ html, body {
   letter-spacing: 0;
 }
 
+/* A suggestion, not a gate: it must never sit on top of the START button. */
 #rotate-hint {
-  background: #04060a;
   z-index: 45;
-  font-size: 12px;
-  letter-spacing: 0.3em;
+  align-items: flex-start;
+  pointer-events: none;
+  padding-top: max(14px, env(safe-area-inset-top));
+}
+#rotate-hint > div {
+  pointer-events: auto;
+  background: rgba(6, 9, 14, 0.9);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(6px);
+  padding: 12px 20px;
+  text-align: center;
   color: var(--ink-dim);
+  max-width: 88vw;
+}
+#rotate-hint p {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  line-height: 1.9;
+  margin: 0 0 6px;
+}
+#rotate-hint small {
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: #4e5762;
 }
 
 @media (max-width: 560px) {

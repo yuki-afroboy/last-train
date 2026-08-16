@@ -168,20 +168,25 @@ export function buildVending(mats: MaterialLibrary, variant = 0): VendingProp {
     [R.pick(PRODUCT_PALETTES[2]), R.pick(PRODUCT_PALETTES[0]), R.pick(PRODUCT_PALETTES[1]), R.pick(PRODUCT_PALETTES[2]), R.pick(PRODUCT_PALETTES[0])],
   ];
 
+  // The display is a light source, not a lit surface: keep its diffuse albedo
+  // low so the machine's own spill light cannot blow the front out to white,
+  // and let the emissive map carry the image.
   const tex = T.vendingFront(products, variant);
   const frontMat = new THREE.MeshStandardMaterial({
     map: tex,
+    color: 0x272727,
     emissive: 0xffffff,
     emissiveMap: tex,
-    emissiveIntensity: 0.7,
+    emissiveIntensity: 0.95,
     roughness: 0.28,
     metalness: 0.1,
   });
   const front = mesh(new THREE.PlaneGeometry(W * 0.98, H * 0.96), frontMat, 0, H / 2, D / 2 + 0.008, false, false);
   group.add(front);
 
-  const light = new THREE.PointLight(0xffe7c4, 10, 9, 2);
-  light.position.set(0, H * 0.62, D / 2 + 0.7);
+  // pushed well clear of the cabinet so it lights the platform, not itself
+  const light = new THREE.PointLight(0xffe7c4, 9, 8, 2);
+  light.position.set(0, H * 0.62, D / 2 + 1.5);
   group.add(light);
 
   return { group, front, frontMat, light, products, variant };
