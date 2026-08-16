@@ -299,44 +299,58 @@ export function buildClock(mats: MaterialLibrary): ClockProp {
   group.add(mesh(new THREE.CylinderGeometry(R2 + 0.04, R2 + 0.04, 0.13, 28), caseMat, 0, 0, 0));
   group.children[0].rotation.x = Math.PI / 2;
 
+  // A near-white enamel dial takes a ceiling lamp almost head-on on its rear
+  // face and blows out to an unreadable white disc. Hold the lit response down
+  // with `color` and carry legibility on the emissive instead, so both faces
+  // read at the same brightness whichever side the light is on.
   const faceTex = T.clockFace();
   const faceMat = new THREE.MeshStandardMaterial({
     map: faceTex,
+    color: 0x86867f,
     emissive: 0xffffff,
     emissiveMap: faceTex,
-    emissiveIntensity: 0.22,
-    roughness: 0.42,
+    emissiveIntensity: 0.3,
+    roughness: 0.62,
     metalness: 0.0,
   });
 
-  const hands = new THREE.Group();
-  const makeFace = (dir: number): THREE.Group => {
-    const f = new THREE.Group();
-    const face = mesh(new THREE.CircleGeometry(R2, 32), faceMat, 0, 0, 0.068 * dir, false, false);
-    if (dir < 0) face.rotation.y = Math.PI;
-    f.add(face);
+  const handMat = new THREE.MeshStandardMaterial({ color: 0x1a1d20, roughness: 0.5, metalness: 0.2 });
+  const secMat = new THREE.MeshStandardMaterial({ color: 0xb4231d, roughness: 0.5, metalness: 0.2 });
 
-    const handMat = new THREE.MeshStandardMaterial({ color: 0x1a1d20, roughness: 0.5, metalness: 0.2 });
-    const secMat = new THREE.MeshStandardMaterial({ color: 0xb4231d, roughness: 0.5, metalness: 0.2 });
+  /**
+   * One dial: face, three hands and the boss, all built facing local +Z.
+   *
+   * Both dials are built identically and the rear one is turned around by its
+   * parent group. Building the rear dial "pre-mirrored" and *also* rotating the
+   * group double-flips it: its hands end up on the front, so the clock shows
+   * six hands, and they run backwards when read from behind.
+   */
+  const makeFace = (): THREE.Group => {
+    const f = new THREE.Group();
+    f.add(mesh(new THREE.CircleGeometry(R2, 32), faceMat, 0, 0, 0.068, false, false));
 
     const mk = (len: number, w: number, mat: THREE.Material, back: number): THREE.Object3D => {
       const pivot = new THREE.Object3D();
-      const bar = mesh(box(w, len, 0.012), mat, 0, len / 2 - back, 0.075 * dir, false, false);
-      pivot.add(bar);
+      pivot.position.z = 0.075;
+      pivot.add(mesh(box(w, len, 0.012), mat, 0, len / 2 - back, 0, false, false));
       f.add(pivot);
       return pivot;
     };
     const h = mk(R2 * 0.52, 0.032, handMat, 0.04);
     const m = mk(R2 * 0.78, 0.022, handMat, 0.05);
     const s = mk(R2 * 0.84, 0.009, secMat, 0.08);
-    f.add(mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.02, 10), handMat, 0, 0, 0.082 * dir, false, false));
-    (f.children[f.children.length - 1] as THREE.Mesh).rotation.x = Math.PI / 2;
+
+    const boss = mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.02, 10), handMat, 0, 0, 0.082, false, false);
+    boss.rotation.x = Math.PI / 2;
+    f.add(boss);
+
     f.userData.hands = { h, m, s };
     return f;
   };
 
-  const front = makeFace(1);
-  const back = makeFace(-1);
+  const hands = new THREE.Group();
+  const front = makeFace();
+  const back = makeFace();
   back.rotation.y = Math.PI;
   hands.add(front, back);
   group.add(hands);
@@ -423,14 +437,19 @@ export interface SignProp {
 
 export function buildStationSign(mats: MaterialLibrary, spec: T.StationSignSpec): SignProp {
   const group = new THREE.Group();
+  // Same exposure trap as the clock dial, but worse: the board hangs a couple
+  // of metres under the lamp row and catches several fittings at once, which
+  // clipped the whole panel to white and made the station name — and the two
+  // anomalies that change it — impossible to read.
   const tex = T.stationSign(spec);
   const material = new THREE.MeshStandardMaterial({
     map: tex,
+    color: 0x5c5c58,
     emissive: 0xffffff,
     emissiveMap: tex,
-    emissiveIntensity: 0.3,
-    roughness: 0.42,
-    metalness: 0.05,
+    emissiveIntensity: 0.2,
+    roughness: 0.78,
+    metalness: 0.02,
   });
 
   const W = 1.86;

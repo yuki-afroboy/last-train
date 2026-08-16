@@ -216,10 +216,18 @@ export class MaterialLibrary {
     });
   }
 
-  /** Unlit signage: canvas texture lit only by the scene (no emission). */
-  signage(tex: THREE.Texture, roughness = 0.52): THREE.MeshStandardMaterial {
-    const m = this.std({ map: tex, roughness, metalness: 0.08, envMapIntensity: 0.45 });
-    return m;
+  /**
+   * Unlit signage: canvas texture lit only by the scene. The albedo multiplier
+   * keeps near-white plates from clipping when they sit close under a lamp.
+   */
+  signage(tex: THREE.Texture, roughness = 0.66): THREE.MeshStandardMaterial {
+    return this.std({
+      map: tex,
+      color: 0xa8a8a3,
+      roughness,
+      metalness: 0.04,
+      envMapIntensity: 0.4,
+    });
   }
 
   applyEnv(env: THREE.Texture): void {

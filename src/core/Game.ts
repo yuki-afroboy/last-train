@@ -156,6 +156,12 @@ export class Game {
         this.closeInspect();
         return;
       }
+      // Settings sits above everything; ESC must back out of it rather than
+      // resume the game underneath it.
+      if (this.ui.settingsOpen) {
+        this.ui.dismissSettings();
+        return;
+      }
       if (this.phase === 'playing') this.setPaused(true);
       else if (this.phase === 'paused') this.setPaused(false);
     };

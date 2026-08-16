@@ -101,10 +101,22 @@ export class UI {
     this.hide('pause');
   }
 
+  /**
+   * Settings is a full screen, not a popover: the layer it was opened from has
+   * to be hidden while it is up. Leaving the title visible underneath let its
+   * headline and buttons draw over the panel and swallow clicks meant for it.
+   */
   openSettings(from: Layer): void {
     this.settingsReturn = from;
+    this.hide(from);
     this.syncSettings();
     this.show('settings');
+  }
+
+  private closeSettings(): void {
+    this.hide('settings');
+    if (this.settingsReturn === 'title') this.showTitle();
+    else this.show(this.settingsReturn);
   }
 
   showResult(kind: 'clear' | 'over', clock: string, title: string, body: string): void {
@@ -170,6 +182,15 @@ export class UI {
     return !$('inspect').classList.contains('hidden');
   }
 
+  get settingsOpen(): boolean {
+    return !$('settings').classList.contains('hidden');
+  }
+
+  /** ESC handling for the settings screen, wherever it was opened from. */
+  dismissSettings(): void {
+    if (this.settingsOpen) this.closeSettings();
+  }
+
   setDebug(text: string | null): void {
     const el = $('debug');
     if (text === null) {
@@ -190,10 +211,7 @@ export class UI {
     $('btn-quit').addEventListener('click', () => this.onQuitToTitle?.());
     $('btn-retry').addEventListener('click', () => this.onRetry?.());
     $('btn-result-title').addEventListener('click', () => this.onQuitToTitle?.());
-    $('btn-settings-back').addEventListener('click', () => {
-      this.hide('settings');
-      if (this.settingsReturn === 'title') this.showTitle();
-    });
+    $('btn-settings-back').addEventListener('click', () => this.closeSettings());
     $('inspect').addEventListener('click', () => this.onCloseInspect?.());
     $('tbtn-menu').addEventListener('click', () => this.onResume?.());
 

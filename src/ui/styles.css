@@ -138,7 +138,27 @@ html, body {
   cursor: pointer;
 }
 .seg button.on { background: rgba(207, 227, 255, 0.16); color: #fff; }
-#settings .menu-btn { margin-top: 22px; align-self: center; }
+/*
+ * The panel scrolls when it does not fit (phone landscape is only ~390 px
+ * tall), so BACK is pinned to the bottom of the scroll box — otherwise it sits
+ * below the fold and the only way out of Settings is invisible.
+ */
+#settings .menu-btn {
+  margin-top: 22px;
+  align-self: center;
+  position: sticky;
+  bottom: 0;
+  background: rgba(7, 10, 15, 0.97);
+}
+
+@media (max-height: 600px) {
+  .panel { padding: 18px 26px 12px; max-height: 94vh; }
+  .panel h2 { margin-bottom: 12px; }
+  .row { padding: 7px 2px; font-size: 11px; }
+  .row input[type="range"] { width: 150px; }
+  #settings .menu-btn { margin-top: 12px; padding: 10px 24px; }
+  .pause-stats { margin-bottom: 12px; }
+}
 
 /* ---------- boot ---------- */
 #boot { background: var(--bg); z-index: 40; }
@@ -252,6 +272,8 @@ html, body {
   text-shadow: 0 2px 12px #000, 0 0 30px #000;
   opacity: 0;
   transition: opacity 0.7s;
+  /* announcements and reveal lines are written with deliberate line breaks */
+  white-space: pre-line;
 }
 #subtitle.show { opacity: 1; }
 
@@ -303,7 +325,9 @@ html, body {
 .inspect-close b { font-family: var(--mono); }
 
 /* ---------- pause / result ---------- */
-#pause, #settings { background: rgba(2, 4, 7, 0.66); backdrop-filter: blur(6px); z-index: 28; }
+#pause { background: rgba(2, 4, 7, 0.66); backdrop-filter: blur(6px); z-index: 28; }
+/* above #title (30) so it can never be drawn under the screen that opened it */
+#settings { background: rgba(2, 4, 7, 0.82); backdrop-filter: blur(8px); z-index: 34; }
 .pause-stats {
   font-family: var(--mono);
   font-size: 11px;
@@ -312,6 +336,7 @@ html, body {
   margin-bottom: 20px;
   text-align: center;
   line-height: 1.9;
+  white-space: pre-line;
 }
 
 #result { background: #04060a; z-index: 32; }

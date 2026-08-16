@@ -66,7 +66,12 @@ const poses = {
   'e2-exit-sign': [9, 0.4, -Math.PI / 2, 0.16],
   'f-look-back': [8, 0.6, Math.PI / 2, 0],
   'g-clock': [-4, 1.4, -Math.PI / 2, 0.42],
+  'g2-clock-front': [-1.2, 3.5, 0, 0.44],
+  'g3-clock-back': [-1.2, 0.0, Math.PI, 0.44],
   'h-vending': [7.8, 1.2, Math.PI, 0.06],
+  'i-station-sign': [-8.5, 0.9, Math.PI, 0.2],
+  'j-poster-rules': [-16.4, -2.0, 0, 0.05],
+  'k-board': [11.5, 0.4, Math.PI, 0.26],
 };
 
 for (const [name, p] of Object.entries(poses)) {
