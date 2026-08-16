@@ -7,8 +7,10 @@ on:
       - 'claude/**'
   workflow_dispatch:
 
+# contents: write is needed to publish the built site to the gh-pages branch.
+# pages: write lets the run point GitHub Pages at that branch.
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -17,7 +19,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,23 +37,35 @@ jobs:
       - name: Production build
         run: npm run build
 
-      # GitHub Pages serves the site from a subpath (/last-train/). The build
-      # uses a relative base so no path rewriting is needed here.
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
+      # The site is published from a gh-pages branch rather than through
+      # actions/deploy-pages. The `github-pages` environment only accepts
+      # deployments from the default branch, so an Actions-source deploy fails
+      # on every feature branch; a branch source has no such restriction and
+      # publishes the same dist/ from wherever the work happens to live.
+      - name: Publish dist/ to gh-pages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          touch dist/.nojekyll
+          cp dist/index.html dist/404.html   # SPA-safe deep links
+          cd dist
+          git init -q
+          git checkout -qb gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -qm "deploy ${GITHUB_SHA} from ${GITHUB_REF_NAME}"
+          git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
 
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Point GitHub Pages at gh-pages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Create the Pages site if it does not exist yet, then make sure it is
+          # building from the branch. Both calls are idempotent.
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/pages" \
+            -f build_type=legacy -f 'source[branch]=gh-pages' -f 'source[path]=/' || true
+          gh api -X PUT "repos/${GITHUB_REPOSITORY}/pages" \
+            -f build_type=legacy -f 'source[branch]=gh-pages' -f 'source[path]=/' || true
+          echo "site: $(gh api "repos/${GITHUB_REPOSITORY}/pages" --jq .html_url || echo 'not reported')"
