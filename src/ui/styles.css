@@ -1,0 +1,434 @@
+:root {
+  --ink: #dfe4ea;
+  --ink-dim: #8b94a1;
+  --line: rgba(190, 205, 225, 0.18);
+  --bg: #05070b;
+  --accent: #cfe3ff;
+  --jp: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Noto Sans JP",
+    "Meiryo", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", "DejaVu Sans Mono", Menlo, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--jp);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
+#app { position: fixed; inset: 0; }
+
+#scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+.layer.pass { pointer-events: none; }
+.hidden { display: none !important; }
+
+/* ---------- generic controls ---------- */
+.menu-btn {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: rgba(12, 16, 22, 0.5);
+  color: var(--ink);
+  font-family: var(--jp);
+  font-size: 13px;
+  letter-spacing: 0.28em;
+  padding: 13px 34px 13px 38px;
+  margin: 6px 0;
+  min-width: 240px;
+  cursor: pointer;
+  transition: background 0.25s, color 0.25s, letter-spacing 0.35s, border-color 0.25s;
+  backdrop-filter: blur(3px);
+}
+.menu-btn:hover,
+.menu-btn:focus-visible {
+  background: rgba(210, 228, 255, 0.1);
+  border-color: rgba(200, 220, 255, 0.5);
+  letter-spacing: 0.42em;
+  outline: none;
+}
+.menu-btn.subtle { color: var(--ink-dim); font-size: 11px; min-width: 200px; }
+
+.panel {
+  border: 1px solid var(--line);
+  background: rgba(6, 9, 13, 0.86);
+  backdrop-filter: blur(10px);
+  padding: 34px 40px 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 320px;
+  max-width: min(92vw, 560px);
+  max-height: 88vh;
+  overflow-y: auto;
+}
+.panel.wide { align-items: stretch; }
+.panel h2 {
+  margin: 0 0 22px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5em;
+  color: var(--ink-dim);
+  text-align: center;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 11px 2px;
+  border-top: 1px solid rgba(190, 205, 225, 0.08);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  color: var(--ink-dim);
+}
+.row i { font-style: normal; color: var(--accent); margin-left: 10px; font-family: var(--mono); }
+.row input[type="range"] {
+  appearance: none;
+  width: 190px;
+  height: 2px;
+  background: rgba(190, 205, 225, 0.25);
+  outline: none;
+}
+.row input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+}
+.row input[type="range"]::-moz-range-thumb {
+  width: 12px; height: 12px; border: 0; border-radius: 50%; background: var(--accent); cursor: pointer;
+}
+
+.seg { display: inline-flex; border: 1px solid var(--line); }
+.seg button {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--ink-dim);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  padding: 7px 13px;
+  cursor: pointer;
+}
+.seg button.on { background: rgba(207, 227, 255, 0.16); color: #fff; }
+/*
+ * The panel scrolls when it does not fit (phone landscape is only ~390 px
+ * tall), so BACK is pinned to the bottom of the scroll box — otherwise it sits
+ * below the fold and the only way out of Settings is invisible.
+ */
+#settings .menu-btn {
+  margin-top: 22px;
+  align-self: center;
+  position: sticky;
+  bottom: 0;
+  background: rgba(7, 10, 15, 0.97);
+}
+
+@media (max-height: 600px) {
+  .panel { padding: 18px 26px 12px; max-height: 94vh; }
+  .panel h2 { margin-bottom: 12px; }
+  .row { padding: 7px 2px; font-size: 11px; }
+  .row input[type="range"] { width: 150px; }
+  #settings .menu-btn { margin-top: 12px; padding: 10px 24px; }
+  .pause-stats { margin-bottom: 12px; }
+}
+
+/* ---------- boot ---------- */
+#boot { background: var(--bg); z-index: 40; }
+.boot-inner { text-align: center; }
+.boot-title { font-size: 15px; letter-spacing: 0.7em; color: var(--ink-dim); margin-bottom: 26px; }
+.boot-bar { width: 220px; height: 1px; background: rgba(190, 205, 225, 0.18); margin: 0 auto; }
+.boot-bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width 0.3s; }
+.boot-note { margin-top: 18px; font-size: 10px; letter-spacing: 0.3em; color: #555f6d; font-family: var(--mono); }
+
+/* ---------- title ---------- */
+#title { z-index: 30; flex-direction: column; }
+.title-grad {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(120% 80% at 50% 45%, rgba(0,0,0,0) 25%, rgba(2,4,7,0.86) 78%),
+    linear-gradient(180deg, rgba(3,5,9,0.72) 0%, rgba(3,5,9,0.05) 35%, rgba(3,5,9,0.8) 100%);
+}
+.title-inner { position: relative; text-align: center; animation: fadeUp 2.4s ease both; }
+.title-main {
+  margin: 0 0 44px;
+  font-weight: 300;
+  line-height: 1;
+  text-shadow: 0 0 34px rgba(140, 190, 255, 0.28);
+}
+.title-main span { display: block; font-size: clamp(30px, 6.2vw, 62px); letter-spacing: 0.44em; text-indent: 0.44em; }
+.title-main em {
+  display: block;
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: clamp(46px, 11vw, 116px);
+  letter-spacing: 0.06em;
+  margin-top: 8px;
+  color: #eaf2ff;
+  animation: clockPulse 6s ease-in-out infinite;
+}
+.title-menu { display: flex; flex-direction: column; align-items: center; }
+.title-record {
+  margin-top: 26px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  color: #5d6674;
+  min-height: 14px;
+}
+.title-foot {
+  position: absolute;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: #4e5762;
+}
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes clockPulse { 0%,100% { opacity: 0.92; } 50% { opacity: 0.66; } }
+
+/* ---------- hud ---------- */
+#reticle {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 5px; height: 5px;
+  margin: -2.5px 0 0 -2.5px;
+  border-radius: 50%;
+  background: rgba(226, 236, 250, 0.5);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.9);
+  transition: transform 0.18s, background 0.18s;
+}
+#reticle.active { transform: scale(2.1); background: rgba(255, 255, 255, 0.9); }
+
+#prompt {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, 26px);
+  font-size: 11px;
+  letter-spacing: 0.26em;
+  color: rgba(233, 240, 250, 0.86);
+  text-shadow: 0 2px 10px #000;
+}
+#prompt b { font-family: var(--mono); border: 1px solid rgba(233,240,250,0.5); padding: 1px 5px; margin-right: 8px; }
+
+#progress-flash {
+  position: absolute;
+  left: 50%;
+  top: 13%;
+  transform: translateX(-50%);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.4em;
+  color: rgba(226, 238, 255, 0.82);
+  text-shadow: 0 2px 14px #000;
+  opacity: 0;
+  white-space: nowrap;
+}
+#progress-flash.show { animation: flashInOut 5s ease both; }
+@keyframes flashInOut {
+  0% { opacity: 0; }
+  14% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+#subtitle {
+  position: absolute;
+  left: 50%;
+  bottom: max(9vh, 60px);
+  transform: translateX(-50%);
+  max-width: min(86vw, 720px);
+  text-align: center;
+  font-size: clamp(12px, 1.5vw, 15px);
+  letter-spacing: 0.12em;
+  line-height: 1.85;
+  color: rgba(226, 236, 250, 0.9);
+  text-shadow: 0 2px 12px #000, 0 0 30px #000;
+  opacity: 0;
+  transition: opacity 0.7s;
+  /* announcements and reveal lines are written with deliberate line breaks */
+  white-space: pre-line;
+}
+#subtitle.show { opacity: 1; }
+
+/* keep captions clear of the on-screen stick and buttons */
+@media (pointer: coarse) {
+  #subtitle {
+    bottom: max(26vh, 190px);
+    font-size: 13px;
+  }
+  #progress-flash {
+    top: 9%;
+  }
+}
+
+#vignette-alert {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(110% 80% at 50% 50%, rgba(0,0,0,0) 35%, rgba(60,0,4,0.85) 100%);
+  transition: opacity 1.2s;
+}
+#vignette-alert.on { opacity: 1; }
+
+#debug {
+  position: absolute;
+  left: 12px; top: 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.6;
+  color: #7fff9f;
+  text-shadow: 0 1px 3px #000;
+  white-space: pre;
+  pointer-events: none;
+}
+
+/* ---------- inspect ---------- */
+#inspect { background: rgba(2, 4, 7, 0.72); backdrop-filter: blur(4px); z-index: 25; }
+.inspect-card {
+  border: 1px solid var(--line);
+  background: rgba(8, 11, 16, 0.94);
+  padding: 30px 36px;
+  max-width: min(90vw, 520px);
+  animation: fadeUp 0.4s ease both;
+}
+.inspect-title { font-size: 11px; letter-spacing: 0.4em; color: var(--ink-dim); margin-bottom: 16px; }
+.inspect-body { font-size: 14px; line-height: 2; letter-spacing: 0.06em; white-space: pre-line; }
+.inspect-close { margin-top: 22px; font-size: 10px; letter-spacing: 0.24em; color: #565f6c; }
+.inspect-close b { font-family: var(--mono); }
+
+/* ---------- pause / result ---------- */
+#pause { background: rgba(2, 4, 7, 0.66); backdrop-filter: blur(6px); z-index: 28; }
+/* above #title (30) so it can never be drawn under the screen that opened it */
+#settings { background: rgba(2, 4, 7, 0.82); backdrop-filter: blur(8px); z-index: 34; }
+.pause-stats {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--ink-dim);
+  margin-bottom: 20px;
+  text-align: center;
+  line-height: 1.9;
+  white-space: pre-line;
+}
+
+#result { background: #04060a; z-index: 32; }
+.result-inner { text-align: center; animation: fadeUp 2s ease both; max-width: min(90vw, 640px); }
+.result-clock {
+  font-family: var(--mono);
+  font-size: clamp(44px, 10vw, 92px);
+  letter-spacing: 0.05em;
+  color: #eaf2ff;
+  text-shadow: 0 0 40px rgba(150, 200, 255, 0.3);
+}
+#result h2 { font-size: 13px; font-weight: 400; letter-spacing: 0.5em; color: var(--ink-dim); margin: 26px 0 16px; }
+#result p { font-size: 13px; line-height: 2.1; letter-spacing: 0.1em; color: #98a2b0; margin: 0 0 30px; white-space: pre-line; }
+
+/* ---------- touch ---------- */
+#touch { z-index: 20; }
+.stick {
+  position: absolute;
+  left: max(28px, env(safe-area-inset-left));
+  bottom: max(28px, env(safe-area-inset-bottom));
+  width: 128px; height: 128px;
+  border: 1px solid rgba(200, 218, 245, 0.22);
+  border-radius: 50%;
+  pointer-events: auto;
+  touch-action: none;
+  background: rgba(10, 14, 20, 0.22);
+}
+.stick i {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 46px; height: 46px;
+  margin: -23px 0 0 -23px;
+  border-radius: 50%;
+  background: rgba(206, 226, 255, 0.26);
+  border: 1px solid rgba(206, 226, 255, 0.35);
+}
+.tbtn {
+  position: absolute;
+  appearance: none;
+  pointer-events: auto;
+  border: 1px solid rgba(200, 218, 245, 0.25);
+  background: rgba(10, 14, 20, 0.34);
+  color: var(--ink);
+  font-family: var(--jp);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  border-radius: 40px;
+  padding: 15px 22px;
+  right: max(28px, env(safe-area-inset-right));
+  bottom: max(34px, env(safe-area-inset-bottom));
+}
+.tbtn.run { bottom: max(104px, calc(env(safe-area-inset-bottom) + 104px)); font-size: 10px; padding: 12px 18px; }
+.tbtn.menu {
+  top: max(18px, env(safe-area-inset-top));
+  bottom: auto;
+  padding: 9px 15px;
+  font-size: 13px;
+  letter-spacing: 0;
+}
+
+/* A suggestion, not a gate: it must never sit on top of the START button. */
+#rotate-hint {
+  z-index: 45;
+  align-items: flex-start;
+  pointer-events: none;
+  padding-top: max(14px, env(safe-area-inset-top));
+}
+#rotate-hint > div {
+  pointer-events: auto;
+  background: rgba(6, 9, 14, 0.9);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(6px);
+  padding: 12px 20px;
+  text-align: center;
+  color: var(--ink-dim);
+  max-width: 88vw;
+}
+#rotate-hint p {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  line-height: 1.9;
+  margin: 0 0 6px;
+}
+#rotate-hint small {
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: #4e5762;
+}
+
+@media (max-width: 560px) {
+  .menu-btn { min-width: 200px; padding: 12px 22px 12px 26px; }
+  .row { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .row input[type="range"] { width: 100%; }
+  .panel { padding: 26px 22px 22px; }
+}
